@@ -14,11 +14,11 @@ The vRealize Automation Jenkins plugin enables Jenkins to provision vRealize Aut
 ## How to Configure
     
 
-1) Build step : On Job the configuration page, select Add build step and choose “Provision vRealize Automation Blueprint” option
+1) Build step : On the Job configuration page, select Add build step and choose “Provision vRealize Automation Blueprint” option
 
 ![Build step](/doc/BuildJobSelect.png)
 
-2) Configure :  Configure as shown
+2) Configure :  Configure the plugin as shown
 
   * vRealize Automation URL -   The URL for vRealize Automation. 
   * Tenant - vRealize Automation tenant to be used
