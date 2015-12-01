@@ -1,9 +1,7 @@
 # Jenkins vRealize Automation Plugin
 
-This packer project builds and configures a vRA IAAS instance.  There are several builders included in this project.
-The builders include desktop and ESX.
+The vRealize Automation plugin for Jenkins allows Jenkins to provision blueprints using vRealize Automation 7.  
 
- 
 
 ## Requirements
 
@@ -15,23 +13,27 @@ The builders include desktop and ESX.
     
 ## How to Configure
     
-Configuration
--------------
 
-1) Build step : On Job configuration page click on Add build step select “Execute CodeStream Pipeline” option
+1) Build step : On Job the configuration page, select Add build step and choose “Provision vRealize Automation Blueprint” option
 
 ![Build step](/doc/BuildJobSelect.png)
 
-2) Configure :  Configure CodeStream pipeline like show in image. Below is the description of each field
+2) Configure :  Configure as shown
 
-  * Server URl -   vRealize CodeStream host URL
-  * Tenant - User group tenant against which you want to execute the pipeline
-  * User Name - Username for given tenant. User should have Release Manager or Release Engineer Role.
-  * Password - Password for given user
-  * Release Pipeline Name - Pipeline which you want to execute. Pipeline should be activate and its latest version will be executed.
-  * Execute and Wait - If this checkbox is checked the job will wait for pipeline execution to complete or fail.
-  * Add Parameter - If you want to override default value of any pipeline property then you can use this option. Click on Add Parameter and provide property name in Parameter Name. New  value in Parameter Value. For all the other properties default value will be used.
+  * Server URl -   vRealize Automation host URL
+  * Tenant - vRealize Automation tenant to be used
+  * User Name - Username for given tenant. User must be entittled to provision the blueprint in vRealize Automation
+  * Password - Password for  user
+  * Blueprint - The name of the blueprint to be provisioned.
+  * Execute and Wait - If checked the Jenkins job will wait for the blueprint to be provisioned
+  * Add Parameter - Not yet implemented! 
 
 ![Configure](/doc/BuildJob.png)    
     
 
+## To Be Added in the future
+
+    * Add Parameter - Add parameters to the requested blueprint.  For example: number of CPUs.
+    * Destroy Environment -  Post Build job to clean up the environment provisioned by Jenkins
+    * Publish Blueprint - Allows Jenkins to publish a YAML Blueprint to vRealize Automation
+    
