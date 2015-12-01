@@ -9,6 +9,7 @@ The vRealize Automation Jenkins plugin enables Jenkins to provision vRealize Aut
 * Jenkins 1.58+
 * Java 8 to compile plugin or Java 7 if just running in Jenkins
 * vRealize Automation 7 
+* Maven if compiling the plugin
        
     
 ## How to Configure
@@ -36,4 +37,15 @@ The vRealize Automation Jenkins plugin enables Jenkins to provision vRealize Aut
   * Destroy Environment -  Post Build job to clean up the environment provisioned by Jenkins
   * Publish Blueprint - Allows Jenkins to publish a YAML Blueprint to vRealize Automation
   
-    
+
+# Compile and Installation
+
+To compile you must have maven installed.
+
+To compile and run jenkins localy for tesing
+    * mvn hpi:run
+
+To compile only the plugin 
+    * mvn hpi:hpi
+
+Once you have the .hpi file, use the plugin management console (http://example.com:8080/pluginManager/advanced) to upload the hpi file. You must restart Jenkins after the install.
