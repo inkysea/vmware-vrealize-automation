@@ -38,7 +38,7 @@ The vRealize Automation Jenkins plugin enables Jenkins to provision vRealize Aut
   * Publish Blueprint - Allows Jenkins to publish a YAML Blueprint to vRealize Automation
   
 
-# Compile and Installation
+## Compile and Installation
 
 To compile you must have maven installed.
 
