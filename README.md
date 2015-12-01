@@ -42,10 +42,12 @@ The vRealize Automation Jenkins plugin enables Jenkins to provision vRealize Aut
 
 To compile you must have maven installed.
 
-To compile and run jenkins localy for tesing
+To compile and run jenkins locally for testing
+
     * mvn hpi:run
 
 To compile only the plugin 
+
     * mvn hpi:hpi
 
 Once you have the .hpi file, use the plugin management console (http://example.com:8080/pluginManager/advanced) to upload the hpi file. You must restart Jenkins after the install.
