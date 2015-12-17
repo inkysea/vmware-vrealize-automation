@@ -17,7 +17,7 @@
 
     <name>Vmware vRealize Automation Plugin</name>
     <description>Plugin to invoke vRealize Automation  execution api</description>
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/Vmware+vRealize+Automation+Plugin</url>
+    <url>https://wiki.jenkins-ci.org/display/JENKINS/Vmware+vRealize+Automation</url>
     <licenses>
         <license>
             <name>MIT License</name>
