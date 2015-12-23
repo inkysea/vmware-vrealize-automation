@@ -1,0 +1,8 @@
+
+<?jelly escape-by-default='true'?>
+<!--
+  This view is used to render the installed plugins page.
+-->
+<div>
+  A Jenkins plugin that provides integrations for VMware vRealize Automation 7.x
+</div>

@@ -54,7 +54,29 @@ public class vRABuilder extends Builder implements Serializable {
         this.blueprintName = fixEmptyAndTrim(blueprintName);
         this.waitExec = waitExec;
     }
+    public String getvraUrl() {
+        return vraUrl;
+    }
 
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getTenant() {
+        return tenant;
+    }
+
+    public String getblueprintName() {
+        return blueprintName;
+    }
+
+    public boolean isWaitExec() {
+        return waitExec;
+    }
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
