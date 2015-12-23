@@ -15,9 +15,9 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
-    <name>Vmware vRealize Automation Plugin</name>
-    <description>Plugin to invoke vRealize Automation  execution api</description>
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/Vmware+vRealize+Automation</url>
+    <name>VMware vRealize Automation Plugin</name>
+    <description>Plugin to invoke vRealize Automation API</description>
+    <url>https://wiki.jenkins-ci.org/display/JENKINS/VMware+vRealize+Automation</url>
     <licenses>
         <license>
             <name>MIT License</name>
