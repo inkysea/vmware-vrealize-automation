@@ -41,10 +41,13 @@ public class vRABuildWrapper extends BuildWrapper {
     // required for to write the deployment properties back to Jenkins environment variables.
     @Override
     public void makeBuildVariables(AbstractBuild build,
-                                   Map<String, String> variables) {
+                                   Map<String, String> variables){
+
+        int counter = 1;
 
         for (Deployment deployment : deployments) {
-            variables.putAll(deployment.getOutputs());
+            variables.putAll(deployment.getDeploymentComponents(counter));
+            counter++;
         }
 
     }
@@ -58,6 +61,7 @@ public class vRABuildWrapper extends BuildWrapper {
 
         boolean success = true;
 
+        int counter = 1;
         for (PluginParam param : params) {
 
             final Deployment deployment = newDeployment(listener.getLogger(), param);
@@ -66,9 +70,9 @@ public class vRABuildWrapper extends BuildWrapper {
                 if (deployment.Create()) {
                     this.deployments.add(deployment);
 
-                    System.out.println("Machine List : "+deployment.getOutputs());
+                    env.putAll(deployment.getDeploymentComponents(counter));
 
-                    env.putAll(deployment.getOutputs());
+                    counter++;
                 } else {
                     build.setResult(Result.FAILURE);
                     success = false;

@@ -29,10 +29,12 @@ public class Deployment {
             ":\"\", \"subtenantRef\":\"\", \"subtenantLabel\":\"\"\n" +
             "}, \"state\":\"SUBMITTED\", \"requestNumber\":0, \"requestData\":{\"entries\":[]}}";
 
-    private List machineList;
-    private List loadBalancerList;
 
-    private Map<String, String> deploymentVars = new HashMap<String, String>();
+    private List<List<String>> machineList = new ArrayList<List<String>>();
+    private ArrayList<String> machineDataList = new ArrayList<String>();
+
+    private List<List<String>> loadBalancerList = new ArrayList<List<String>>();
+    private ArrayList<String> loadBalancerDataList = new ArrayList<String>();
 
 
     public Deployment(PrintStream logger, PluginParam params) throws IOException {
@@ -61,7 +63,6 @@ public class Deployment {
                 case SUCCESSFUL:
                     System.out.println("Request completed successfully");
                     DeploymentResources();
-                    deploymentVars.put(getDeploymentName()+"_NAME", getDeploymentName());
                     rcode = true;
                     break;
                 case FAILED:
@@ -77,55 +78,120 @@ public class Deployment {
 
     }
 
-    public List getMachineList(String name) throws IOException {
 
-        this.deploymentResources = this.request.GetResourceView();
-        return getMachineList();
-    }
-
-    public List getMachineList() throws IOException{
+    private void getMachineList() {
 
         JsonArray contentArray = this.deploymentResources.getAsJsonArray("content");
-        System.out.println("Array content :" + contentArray );
 
         for (JsonElement content : contentArray) {
 
             if (content.getAsJsonObject().get("resourceType").getAsString().contains("Infrastructure.Virtual")) {
 
                 JsonObject jsonData = content.getAsJsonObject().getAsJsonObject("data");
-                JsonArray  jsonArray = jsonData.getAsJsonArray("NETWORK_LIST");
-                JsonObject jsonNetworkData = jsonArray.getAsJsonObject().getAsJsonObject("data");
-
-                jsonNetworkData.get("NETWORK_NAME").getAsString();
-                jsonNetworkData.get("NETWORK_ADDRESS").getAsString();
+                JsonArray  networkArray = jsonData.getAsJsonArray("NETWORK_LIST");
 
 
-                String[] machineArray = {
-                        content.getAsJsonObject().get("resourceType").getAsString(),
-                        jsonData.getAsJsonObject("name").getAsString(),
-                        jsonData.getAsJsonObject().get("Component").getAsString(),
-                        jsonNetworkData.get("NETWORK_NAME").getAsString(),
-                        jsonNetworkData.get("NETWORK_ADDRESS").getAsString(),
-                };
+                for (JsonElement e : networkArray) {
+                    JsonElement jsonNetworkData = e.getAsJsonObject().get("data");
 
-                this.machineList.add(machineArray);
+                    machineDataList.add(content.getAsJsonObject().get("resourceType").getAsString());
+                    machineDataList.add(jsonData.getAsJsonObject().get("Component").getAsString());
+                    machineDataList.add(content.getAsJsonObject().get("name").getAsString());
+                    machineDataList.add(jsonNetworkData.getAsJsonObject().get("NETWORK_NAME").getAsString());
+                    machineDataList.add(jsonNetworkData.getAsJsonObject().get("NETWORK_ADDRESS").getAsString());
+
+                    machineList.add(machineDataList);
+
+                }
 
             }
         }
 
-        return this.machineList;
     }
 
-    public Map<String, String> getOutputs() {
+    private void getLoadBalancerList() {
+
+        JsonArray contentArray = this.deploymentResources.getAsJsonArray("content");
+
+        for (JsonElement content : contentArray) {
+
+            if (content.getAsJsonObject().get("resourceType").getAsString().contains("Infrastructure.Network.LoadBalancer")) {
+
+                JsonObject jsonData = content.getAsJsonObject().getAsJsonObject("data");
+
+                loadBalancerDataList.add(content.getAsJsonObject().get("resourceType").getAsString());
+                loadBalancerDataList.add(jsonData.getAsJsonObject().get("Name").getAsString());
+                loadBalancerDataList.add(jsonData.getAsJsonObject().get("LoadBalancerInfo").getAsString());
+
+                loadBalancerList.add(loadBalancerDataList);
+
+                }
+
+            }
+
+    }
+
+    public Map <String, String> getMachineHashMap() throws IOException {
+
+        Map machineMap = null;
+
+        getMachineList();
+
+
+        for( List machine : this.machineList ){
+            //creat map named grup__machine_name__network_name :  network address
+            for ( Object data : machine ){
+                System.out.println(data.toString());
+            }
+
+        }
+
+        return machineMap;
+    }
+
+    public Map<String, String> getDeploymentComponents(int count) {
         // Prefix outputs with stack name to prevent collisions with other stacks created in the same build.
         HashMap<String, String> map = new HashMap<String, String>();
-        for (String key : deploymentVars.keySet()) {
-            map.put(params.getTenant() + "_" + key, deploymentVars.get(key));
+
+        String deploymentName = getDeploymentName();
+
+        map.put("DEPLOYMENT_"+count+"_NAME", deploymentName);
+        map.put("DEPLOYMENT_"+count+"_TENANT", params.getTenant());
+
+
+        getMachineList();
+
+        for( List machine : this.machineList ){
+            //creat map named grup__machine_name__network_name :  network address
+            for ( Object data : machine ){
+                //tenant_deployment_group_machine_network = IP
+                map.put(params.getTenant() + "_" + deploymentName+"_"+
+                                machine.get(1).toString()+"_"+ machine.get(2).toString()+"_"+
+                                machine.get(3).toString(),
+                                machine.get(4).toString());
+            }
+
         }
+
+        getLoadBalancerList();
+
+        for( List loadbalancer : this.loadBalancerList ){
+            //creat map named grup__machine_name__network_name :  network address
+            for ( Object data : loadbalancer ){
+                //tenant_deployment_group_machine_network = IP
+                map.put(params.getTenant() + "_" + deploymentName+
+                                loadbalancer.get(1).toString(),
+                                loadbalancer.get(2).toString());
+            }
+
+        }
+
+
+
         return map;
     }
 
-    public String getDeploymentName() throws IOException{
+    public String getDeploymentName(){
 
         JsonArray contentArray = this.deploymentResources.getAsJsonArray("content");
         for (JsonElement content : contentArray) {
@@ -165,7 +231,6 @@ public class Deployment {
     public void getParentResourceID(String name) throws IOException{
 
         JsonArray contentArray = this.deploymentResources.getAsJsonArray("content");
-        System.out.println("Array content :" + contentArray );
 
         for (JsonElement content : contentArray) {
             System.out.println("Content :" + content.getAsJsonObject().get("name").getAsString() );
@@ -210,7 +275,6 @@ public class Deployment {
     private void getTenant(){
 
         JsonArray contentArray = this.deploymentResources.getAsJsonArray("content");
-        System.out.println("Array content :" + contentArray );
 
         for (JsonElement content : contentArray) {
             if (content.getAsJsonObject().get("resourceId").getAsString().equals(this.parentResourceID)) {
@@ -223,7 +287,6 @@ public class Deployment {
 
     private void getBusinessGroup(){
         JsonArray contentArray = this.deploymentResources.getAsJsonArray("content");
-        System.out.println("Array content :" + contentArray );
 
         for (JsonElement content : contentArray) {
             if (content.getAsJsonObject().get("resourceId").getAsString().equals(this.parentResourceID)) {
