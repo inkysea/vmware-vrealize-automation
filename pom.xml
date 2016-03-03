@@ -11,7 +11,7 @@
     </parent>
     <groupId>com.inkysea.vmware.vra</groupId>
     <artifactId>vmware-vrealize-automation-plugin</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1</version>
     <packaging>hpi</packaging>
 
     <name>VMware vRealize Automation Plugin</name>
@@ -177,7 +177,7 @@
                 </executions>
                 <configuration>
                     <providerSelection>1.8</providerSelection>
-                    <source/>
+                    <source />
                 </configuration>
                 <dependencies>
                     <dependency>
