@@ -201,8 +201,8 @@ public class Deployment {
 
         String deploymentName = getDeploymentName();
 
-        map.put("DEPLOYMENT_"+count+"_NAME", deploymentName);
-        map.put("DEPLOYMENT_"+count+"_TENANT", params.getTenant());
+        map.put("VRADEP_"+count+"_NAME", deploymentName);
+        map.put("VRADEP_"+count+"_TENANT", params.getTenant());
 
 
         getMachineList();
@@ -211,10 +211,11 @@ public class Deployment {
             //creat map named grup__machine_name__network_name :  network address
             for ( Object data : machine ){
                 //tenant_deployment_group_machine_network = IP
-                map.put(params.getTenant() + "_" + deploymentName+"_"+
-                                machine.get(1).toString()+"_"+ machine.get(2).toString()+"_"+
-                                machine.get(3).toString(),
-                                machine.get(4).toString());
+                map.put(params.getTenant().toUpperCase() + "_" + deploymentName.toUpperCase()+"_"+
+                                machine.get(1).toString().toUpperCase()+"_"+
+                                machine.get(2).toString().toUpperCase()+"_"+
+                                machine.get(3).toString().toUpperCase(),
+                                machine.get(4).toString().toUpperCase());
             }
 
         }
@@ -225,8 +226,8 @@ public class Deployment {
             //creat map named grup__machine_name__network_name :  network address
             for ( Object data : loadbalancer ){
                 //tenant_deployment_group_machine_network = IP
-                map.put(params.getTenant() + "_" + deploymentName+
-                                loadbalancer.get(1).toString(),
+                map.put(params.getTenant().toUpperCase() + "_" + deploymentName.toUpperCase()+
+                                loadbalancer.get(1).toString().toUpperCase(),
                                 loadbalancer.get(2).toString());
             }
 
