@@ -49,7 +49,7 @@ public class vRABuildWrapper extends BuildWrapper {
 
         for (Deployment deployment : deployments) {
             //change counter to string and append be for build environment
-            String strCounter = Integer.toString(counter)+"be";
+            String strCounter = "BE_"+Integer.toString(counter);
             variables.putAll(deployment.getDeploymentComponents(strCounter));
             counter++;
         }
