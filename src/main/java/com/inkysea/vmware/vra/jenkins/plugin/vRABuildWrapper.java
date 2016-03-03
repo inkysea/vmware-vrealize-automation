@@ -2,6 +2,8 @@ package com.inkysea.vmware.vra.jenkins.plugin;
 
 import com.inkysea.vmware.vra.jenkins.plugin.model.Deployment;
 import com.inkysea.vmware.vra.jenkins.plugin.model.PluginParam;
+import com.inkysea.vmware.vra.jenkins.plugin.model.RequestParam;
+import com.inkysea.vmware.vra.jenkins.plugin.util.EnvVariableResolver;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
@@ -23,18 +25,18 @@ import java.util.concurrent.TimeoutException;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
-/**
- * Created by kthieler on 2/25/16.
- */
+
 public class vRABuildWrapper extends BuildWrapper {
 
 
     protected List<PluginParam> params;
     protected List<Deployment> deployments = new ArrayList<Deployment>();
+    private List<RequestParam> requestParams;
+
 
 
     @DataBoundConstructor
-    public vRABuildWrapper( List<PluginParam> params ) {
+    public vRABuildWrapper( List<PluginParam> params) {
         this.params = params;
     }
 
@@ -46,7 +48,9 @@ public class vRABuildWrapper extends BuildWrapper {
         int counter = 1;
 
         for (Deployment deployment : deployments) {
-            variables.putAll(deployment.getDeploymentComponents(counter));
+            //change counter to string and append be for build environment
+            String strCounter = Integer.toString(counter)+"be";
+            variables.putAll(deployment.getDeploymentComponents(strCounter));
             counter++;
         }
 
@@ -58,20 +62,29 @@ public class vRABuildWrapper extends BuildWrapper {
 
         EnvVars env = build.getEnvironment(listener);
         env.overrideAll(build.getBuildVariables());
+        EnvVariableResolver helper = new EnvVariableResolver(build, listener);
+
 
         boolean success = true;
 
         int counter = 1;
         for (PluginParam param : params) {
 
-            final Deployment deployment = newDeployment(listener.getLogger(), param);
+            // Resolve any environment variables in the parameters
+            PluginParam fparam = new PluginParam(helper.replaceBuildParamWithValue(param.getServerUrl()),
+                    helper.replaceBuildParamWithValue(param.getUserName()),
+                    helper.replaceBuildParamWithValue(param.getPassword()),
+                    helper.replaceBuildParamWithValue(param.getTenant()),
+                    helper.replaceBuildParamWithValue(param.getBluePrintName()),
+                    param.isWaitExec(), param.getRequestParams());
 
+            final Deployment deployment = newDeployment(listener.getLogger(), fparam);
 
                 if (deployment.Create()) {
                     this.deployments.add(deployment);
-
-                    env.putAll(deployment.getDeploymentComponents(counter));
-
+                    //change counter to string and append be for build environment
+                    String strCounter = Integer.toString(counter)+"be";
+                    env.putAll(deployment.getDeploymentComponents(strCounter));
                     counter++;
                 } else {
                     build.setResult(Result.FAILURE);

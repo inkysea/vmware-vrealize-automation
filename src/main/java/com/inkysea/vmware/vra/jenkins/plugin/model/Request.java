@@ -13,6 +13,8 @@ public class Request  {
 
     private RestClient restclient;
     private PluginParam params;
+    private DestroyParam dparams;
+
     private ExecutionStatus executionStatus;
     private String REQUESTS_ID_URL = "";
     private String FETCH_CATALOG_ITEM = "";
@@ -30,11 +32,13 @@ public class Request  {
     private PrintStream logger;
     private String catalogId;
     public String requestID;
+    public JsonObject bluePrintTemplate;
 
 
 
 
     public Request(PrintStream logger, PluginParam params) throws IOException {
+    // Constructor for build and wrapper to create or destroy deployment
 
         this.params = params;
         this.logger = logger;
@@ -51,7 +55,6 @@ public class Request  {
 
         this.REQUESTS_ID_URL = catalogServiceApiUrl + "consumer/requests/%s";
         this.REQUESTS_POST_URL = catalogServiceApiUrl + "consumer/requests/";
-
         this.FETCH_CATALOG_ITEM = catalogServiceApiUrl + "consumer/entitledCatalogItemViews?$filter=name+eq+'%s'";
         this.PROVISION_BLUEPRINT = catalogServiceApiUrl + "consumer/entitledCatalogItems/%s/requests";
         this.REQUEST_RESOURCEVIEW_REST = catalogServiceApiUrl + "consumer/requests/%s/resourceViews";
@@ -60,6 +63,33 @@ public class Request  {
         this.RESOURCE_ACTIONS_REST = catalogServiceApiUrl + "consumer/resources/%s/actions/";
         this.RESOURCEVIEW_REST = catalogServiceApiUrl + "consumer/resourceViews/";
 
+    }
+
+    public Request(PrintStream logger, DestroyParam dparams) throws IOException {
+    // Constructor for post build actions to destroy deployment
+
+        this.dparams = dparams;
+        this.logger = logger;
+
+
+        try {
+            this.restclient  = new RestClient(dparams);
+            this.AUTH_TOKEN = restclient.AuthToken();
+        }catch ( IOException e) {
+            e.printStackTrace();
+        }
+
+        String catalogServiceApiUrl = dparams.getServerUrl() + "/catalog-service/api/";
+
+        this.REQUESTS_ID_URL = catalogServiceApiUrl + "consumer/requests/%s";
+        this.REQUESTS_POST_URL = catalogServiceApiUrl + "consumer/requests/";
+        this.FETCH_CATALOG_ITEM = catalogServiceApiUrl + "consumer/entitledCatalogItemViews?$filter=name+eq+'%s'";
+        this.PROVISION_BLUEPRINT = catalogServiceApiUrl + "consumer/entitledCatalogItems/%s/requests";
+        this.REQUEST_RESOURCEVIEW_REST = catalogServiceApiUrl + "consumer/requests/%s/resourceViews";
+        this.RESOURCE_ACTIONS_REQUEST_TEMPLATE_REST =  catalogServiceApiUrl + "consumer/resources/%s/actions/%s/requests/template";
+        this.RESOURCE_ACTIONS_REQUEST_REST =  catalogServiceApiUrl + "consumer/resources/%s/actions/%s/requests";
+        this.RESOURCE_ACTIONS_REST = catalogServiceApiUrl + "consumer/resources/%s/actions/";
+        this.RESOURCEVIEW_REST = catalogServiceApiUrl + "consumer/resourceViews/";
 
     }
 
@@ -118,21 +148,30 @@ public class Request  {
         String responseAsJson = restclient.FormatResponseAsJsonString(vRAResponse);
         System.out.println("BP JSON : "+responseAsJson);
 
-        response = restclient.FormJsonObject(responseAsJson);
+        this.bluePrintTemplate = restclient.FormJsonObject(responseAsJson);
 
-        return response;
+        return this.bluePrintTemplate ;
     }
 
     public JsonObject ProvisionBluePrint() throws IOException {
 
-        JsonObject response = this.GetBluePrintTemplate();
+        JsonObject template = this.GetBluePrintTemplate();
+
+        JsonObject response = ProvisionBluePrint(template);
+
+        return response;
+    }
+
+    public JsonObject ProvisionBluePrint(JsonObject template) throws IOException {
 
         String url = String.format(PROVISION_BLUEPRINT, this.catalogId);
         Gson gson = new Gson();
 
-        HttpResponse httpResponse = restclient.Post(url, response.toString());
+        System.out.println("Using Template : "+template.toString());
+
+        HttpResponse httpResponse = restclient.Post(url, template.toString());
         String responseAsJson = restclient.FormatResponseAsJsonString(httpResponse);
-        response = restclient.FormJsonObject(responseAsJson);
+        JsonObject response = restclient.FormJsonObject(responseAsJson);
         this.requestID = response.get("id").getAsString();
         return response;
     }

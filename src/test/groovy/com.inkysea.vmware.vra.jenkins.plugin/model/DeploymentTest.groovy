@@ -1,5 +1,7 @@
 package com.inkysea.vmware.vra.jenkins.plugin.model
 
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import org.junit.Test
 
 /**
@@ -18,10 +20,13 @@ class DeploymentTest extends GroovyTestCase {
     private String blueprintName = "CentOS_7";
     private boolean waitExec = true;
     protected List<Deployment> deployments = new ArrayList<Deployment>();
+    private String cpu = "{ \"data\":{\"CentOS7\":{\"data\":{\"cpu\":2}}}}";
+    private List<RequestParam> requestParam = new ArrayList<RequestParam>();
+
 
 
     DeploymentTest() {
-        this.params = new PluginParam(vRAURL, userName, password, tenant, blueprintName, waitExec)
+        this.params = new PluginParam(vRAURL, userName, password, tenant, blueprintName, waitExec, requestParam)
     }
 
 
@@ -37,6 +42,7 @@ class DeploymentTest extends GroovyTestCase {
 
     }
 
+
 /*
     @Test
     public void testDestroy() {
@@ -45,6 +51,25 @@ class DeploymentTest extends GroovyTestCase {
         request.Destroy("CentOS_7-09847286");
     }
 */
+
+    @Test
+    public void testJsonMerge() {
+
+
+        JsonParser parser = new JsonParser();
+
+        Deployment request = new Deployment(logger, params)
+
+        JsonObject parent = request.bluePrintTemplate;
+
+        JsonObject req = parser.parse(cpu);
+        System.out.println("JSON to merge : "+req);
+
+
+        String json = request.merge(parent, req ).toString()
+        System.out.println("Merged JSON : "+json);
+
+    }
 
 }
 

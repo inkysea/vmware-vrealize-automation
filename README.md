@@ -13,13 +13,23 @@ The vRealize Automation Jenkins plugin enables Jenkins to provision vRealize Aut
        
     
 ## How to Configure
-    
 
-1) Build step : On the Job configuration page, select Add build step and choose “Provision vRealize Automation Blueprint” option
+The vRealize Automation plugin can be configured as a build environment, build step and a post build action.
 
-![Build step](/doc/BuildJobSelect.png)
+1) Build Environment : Check the "Create vRealize Automation Deployment".
 
-2) Configure :  Configure the plugin as shown
+![Build Environemnt](/doc/vRAPlugin_BuildEnvironment.png)
+
+2) Build step : On the Job configuration page, select Add build step and choose “vRealize Automation Deployment” .
+
+![Build step](/doc/vRA_Build.png)
+
+3) Post-Build Action : Select "Add Post Build" and choose "vRealize Automation Deployment".
+
+![Post Build Action](/doc/vRA_PostBuildmenu.png)
+
+
+Configure :  Configure the plugin as shown
 
   * vRealize Automation URL -   The URL for vRealize Automation. 
   * Tenant - vRealize Automation tenant to be used
@@ -27,15 +37,21 @@ The vRealize Automation Jenkins plugin enables Jenkins to provision vRealize Aut
   * Password - Password for  user
   * Blueprint - The name of the blueprint to be provisioned.
   * Execute and Wait - If checked the Jenkins job will wait for the blueprint to be provisioned
-  * Add Parameter - Not yet implemented! 
+  * Add Deployment Configuration - Deployment configuration parameters can be specified to adjust settings such as CPU.
+   Parameters are specified as JSON.
 
-![Configure](/doc/BuildJob.png)    
-    
+![Configure](/doc/vRA_BuildStep.png)    
+
+       
+    The JSON for parameters can be determined by looking at the JSON blueprint template from vRA.  The template for a 
+    blueprint can be viewed by running a build job and looking at the console output or using the vRealize cloudclient. 
+    See below for the JSON blueprint logged to the build console.
+     
+![Configure](/doc/console.png)    
+     
 
 ## To Be Added in the future
-  * Add Parameter - Add parameters to the requested blueprint.  For example: number of CPUs
-  * Destroy Environment -  Post Build job to clean up the environment provisioned by Jenkins
-  * Publish Blueprint - Allows Jenkins to publish a YAML Blueprint to vRealize Automation
+   * Publish Blueprint - Allows Jenkins to publish a YAML Blueprint to vRealize Automation
   
 
 ## Compile and Installation

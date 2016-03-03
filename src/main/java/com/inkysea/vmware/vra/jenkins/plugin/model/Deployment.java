@@ -2,12 +2,17 @@ package com.inkysea.vmware.vra.jenkins.plugin.model;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.StringReader;
+import java.util.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.*;
+import com.google.gson.stream.JsonReader;
+import net.sf.json.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
+
 
 /**
  * Created by kthieler on 2/24/16.
@@ -15,6 +20,8 @@ import com.google.gson.*;
 public class Deployment {
 
     private PluginParam params;
+    private DestroyParam dParams;
+
     private Request request;
     private PrintStream logger;
     private String DESTROY_TEMPLATE_URL;
@@ -24,6 +31,8 @@ public class Deployment {
     private JsonObject deploymentResources;
     private String businessGroupId;
     private String tenantId;
+    public JsonObject bluePrintTemplate;
+
     private String jsonString = "{\"@type\":\"ResourceActionRequest\", \"resourceRef\":{\"id\":\"\"}, \"resourceActionRef\"\n" +
             ":{\"id\":\"\"}, \"organization\":{\"tenantRef\":\"\", \"tenantLabel\"\n" +
             ":\"\", \"subtenantRef\":\"\", \"subtenantLabel\":\"\"\n" +
@@ -44,13 +53,50 @@ public class Deployment {
 
         this.request  = new Request(logger, params);
 
+        this.bluePrintTemplate = this.request.GetBluePrintTemplate();
+
+
+
+    }
+
+    public Deployment(PrintStream logger, DestroyParam params) throws IOException {
+
+        this.dParams = params;
+        this.logger = logger;
+
+        this.request  = new Request(logger, params);
+
+
     }
 
     public boolean Create() throws IOException, InterruptedException {
 
         boolean rcode = false;
 
-        request.ProvisionBluePrint();
+        // merge deployment options into request blueprint
+
+        JsonParser parser = new JsonParser();
+
+        for ( RequestParam option : params.getRequestParams()){
+
+
+            if (option.getJson().isEmpty() ){
+
+                logger.println("Request Parameter is null. skipping to next parameter");
+
+
+            }else {
+
+                logger.println("Request Parameter : " + option.getJson());
+
+
+                this.bluePrintTemplate = merge(this.bluePrintTemplate.getAsJsonObject(),
+                        parser.parse(option.getJson()).getAsJsonObject());
+            }
+        }
+
+        logger.println("Requesting Blueprint with JSON template : " + this.bluePrintTemplate);
+        request.ProvisionBluePrint(this.bluePrintTemplate);
 
 
         if (this.params.isWaitExec()) {
@@ -149,7 +195,7 @@ public class Deployment {
         return machineMap;
     }
 
-    public Map<String, String> getDeploymentComponents(int count) {
+    public Map<String, String> getDeploymentComponents(String count) {
         // Prefix outputs with stack name to prevent collisions with other stacks created in the same build.
         HashMap<String, String> map = new HashMap<String, String>();
 
@@ -297,7 +343,117 @@ public class Deployment {
         }
     }
 
-    public void Destroy( String DeploymentName ) throws IOException {
+    public static JsonNode merge(JsonNode mainNode, JsonNode updateNode) {
+
+        Iterator<String> fieldNames = updateNode.fieldNames();
+        while (fieldNames.hasNext()) {
+
+            String fieldName = fieldNames.next();
+            JsonNode jsonNode = mainNode.get(fieldName);
+            // if field exists and is an embedded object
+            if (jsonNode != null && jsonNode.isObject()) {
+                merge(jsonNode, updateNode.get(fieldName));
+            }
+            else {
+                if (mainNode instanceof ObjectNode) {
+                    // Overwrite field
+                    JsonNode value = updateNode.get(fieldName);
+                    ((ObjectNode) mainNode).put(fieldName, value);
+                }
+            }
+
+        }
+
+        return mainNode;
+    }
+
+    public static JsonObject merge(JsonObject mainJson, JsonObject updateJson) throws IOException {
+
+        JsonParser parser = new JsonParser();
+        JsonObject returnJSON;
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        String json1 = mainJson.toString();
+        String json2 = updateJson.toString();
+
+        System.out.println("Original BP request : "+json1);
+        System.out.println("JSON to merge : "+json2);
+
+
+        JsonNode mainNode = mapper.readTree(json1);
+        returnJSON = parser.parse(mainNode.toString()).getAsJsonObject();
+        JsonNode updateNode = mapper.readTree(json2);
+
+        returnJSON = parser.parse(merge(mainNode,updateNode).toString()).getAsJsonObject();
+
+        /*Iterator<String> fieldNames = updateNode.fieldNames();
+
+        while (fieldNames.hasNext()) {
+            String updatedFieldName = fieldNames.next();
+            System.out.println("FieldName Next : "+updatedFieldName );
+
+            JsonNode valueToBeUpdated = mainNode.get(updatedFieldName);
+            System.out.println("valueToBeUpdated  : "+valueToBeUpdated.toString() );
+
+            JsonNode updatedValue = updateNode.get(updatedFieldName);
+            System.out.println("updatedValue  : "+updatedValue.toString() );
+
+
+            // If the node is an @ArrayNode
+            if (valueToBeUpdated != null && updatedValue.isArray()) {
+                // running a loop for all elements of the updated ArrayNode
+                for (int i = 0; i < updatedValue.size(); i++) {
+                    JsonNode updatedChildNode = updatedValue.get(i);
+                    // Create a new Node in the node that should be updated, if there was no corresponding node in it
+                    // Use-case - where the updateNode will have a new element in its Array
+                    if (valueToBeUpdated.size() <= i) {
+                        ((ArrayNode) valueToBeUpdated).add(updatedChildNode);
+                    }
+                    // getting reference for the node to be updated
+                    JsonNode childNodeToBeUpdated = valueToBeUpdated.get(i);
+                    updatedValue = mapper.readTree( merge(parser.parse(childNodeToBeUpdated.toString()).getAsJsonObject(),
+                            parser.parse(updatedChildNode.toString()).getAsJsonObject()).toString());
+                }
+                // if the Node is an @ObjectNode
+            } else if (valueToBeUpdated != null && valueToBeUpdated.isObject()) {
+                System.out.println("In ObjectNode "+updatedFieldName);
+                //returnJSON =
+
+                //mainNode = mapper.readTree(merge(parser.parse(valueToBeUpdated.toString()).getAsJsonObject(),
+                //         parser.parse(updatedValue.toString()).getAsJsonObject()).toString());
+                JsonObject test = merge(parser.parse(valueToBeUpdated.toString()).getAsJsonObject(),
+                                parser.parse(updatedValue.toString()).getAsJsonObject());
+                updatedValue = mapper.readTree(test.toString());
+                mainNode = updatedValue;
+
+                System.out.println("Leaving ObjectNode "+updatedFieldName+" with "+updatedValue);
+
+
+            } else {
+                if (mainNode instanceof ObjectNode) {
+                    System.out.println("Updating "+updatedFieldName+" from "+valueToBeUpdated+" to "+updatedValue);
+                    ((ObjectNode) mainNode).replace(updatedFieldName, updatedValue);
+                    System.out.println("JSON after replace : "+mainNode);
+
+                }else{
+                    System.out.println("Error ");
+                    return returnJSON;
+                }
+            }
+            System.out.println("Done with "+updatedFieldName+" JSON "+mainNode);
+
+        }
+
+        returnJSON = parser.parse(mainNode.toString()).getAsJsonObject();
+        System.out.println("Returning with :"+returnJSON);
+        */
+        return returnJSON;
+
+    }
+
+
+    public boolean Destroy( String DeploymentName ) throws IOException {
 
         System.out.println("Destroying Deployment "+DeploymentName);
 
@@ -307,7 +463,7 @@ public class Deployment {
 
         this.getParentResourceID(DeploymentName);
         // Get actionID for destroy
-        this.Destroy();
+        return this.Destroy();
 
     }
 

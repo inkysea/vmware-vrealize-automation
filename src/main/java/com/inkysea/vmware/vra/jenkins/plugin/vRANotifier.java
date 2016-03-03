@@ -44,8 +44,10 @@ public class vRANotifier extends Notifier {
     private String tenant;
     private String blueprintName;
     private boolean waitExec;
+    private List<RequestParam> requestParams;
 
-        private static final Logger LOGGER = Logger.getLogger(vRANotifier.class.getName());
+
+    private static final Logger LOGGER = Logger.getLogger(vRANotifier.class.getName());
 
         @DataBoundConstructor
         public vRANotifier (String vraUrl, String userName, String password, String tenant, String blueprintName, boolean waitExec, List<RequestParam> requestParams) {
@@ -90,7 +92,8 @@ public class vRANotifier extends Notifier {
             PrintStream logger = listener.getLogger();
             EnvVariableResolver helper = new EnvVariableResolver(build, listener);
             PluginParam param = new PluginParam(helper.replaceBuildParamWithValue(vraUrl), helper.replaceBuildParamWithValue(userName),
-                    helper.replaceBuildParamWithValue(password), helper.replaceBuildParamWithValue(tenant), helper.replaceBuildParamWithValue(blueprintName), waitExec);
+                    helper.replaceBuildParamWithValue(password), helper.replaceBuildParamWithValue(tenant),
+                    helper.replaceBuildParamWithValue(blueprintName), waitExec, requestParams);
 
             param.validate();
 
@@ -118,7 +121,7 @@ public class vRANotifier extends Notifier {
 
             @Override
             public String getDisplayName() {
-                return "Destroy vRealize Automation Deployment";
+                return "vRA Notifier";
             }
 
             @Override

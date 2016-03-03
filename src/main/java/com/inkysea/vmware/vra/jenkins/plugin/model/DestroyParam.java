@@ -2,11 +2,9 @@ package com.inkysea.vmware.vra.jenkins.plugin.model;
 
 import hudson.Extension;
 import hudson.Util;
+import hudson.model.AbstractDescribableImpl;
 import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
-import hudson.model.AbstractDescribableImpl;
-
-import hudson.tools.AbstractCommandInstaller;
 import hudson.util.FormValidation;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -21,26 +19,23 @@ import java.util.List;
 import java.util.logging.Logger;
 
 
-public class PluginParam  extends AbstractDescribableImpl<PluginParam> implements Serializable {
+public class DestroyParam extends AbstractDescribableImpl<DestroyParam> implements Serializable {
 
     private String serverUrl;
     private String userName;
     private String password;
     private String tenant;
-    private String blueprintName;
+    private String deploymentName;
     private boolean waitExec;
-    private List<RequestParam> requestParams;
 
     @DataBoundConstructor
-    public PluginParam(String serverUrl, String userName, String password, String tenant,
-                       String blueprintName, boolean waitExec,List<RequestParam> requestParams) {
+    public DestroyParam(String serverUrl, String userName, String password, String tenant,
+                        String deploymentName) {
         this.serverUrl = serverUrl;
         this.userName = userName;
         this.password = password;
         this.tenant = tenant;
-        this.blueprintName = blueprintName;
-        this.waitExec = waitExec;
-        this.requestParams = requestParams;
+        this.deploymentName = deploymentName;
 
     }
 
@@ -60,17 +55,10 @@ public class PluginParam  extends AbstractDescribableImpl<PluginParam> implement
         return tenant;
     }
 
-    public String getBluePrintName() {
-        return blueprintName;
+    public String getDeploymentName() {
+        return deploymentName;
     }
 
-    public boolean isWaitExec() {
-        return waitExec;
-    }
-
-    public List<RequestParam> getRequestParams() {
-        return requestParams;
-    }
 
     public Boolean validate() throws IOException {
         if (StringUtils.isBlank(this.getServerUrl())) {
@@ -89,8 +77,8 @@ public class PluginParam  extends AbstractDescribableImpl<PluginParam> implement
             throw new IOException("vRA tenant cannot be empty");
         }
 
-        if (StringUtils.isBlank(this.getBluePrintName())) {
-            throw new IOException("vRA BluePrint name cannot be empty");
+        if (StringUtils.isBlank(this.getDeploymentName())) {
+            throw new IOException("vRA Deployment name cannot be empty");
         }
 
 
@@ -98,7 +86,7 @@ public class PluginParam  extends AbstractDescribableImpl<PluginParam> implement
     }
 
     @Extension
-    public static final class DescriptorImpl extends Descriptor<PluginParam> {
+    public static final class DescriptorImpl extends Descriptor<DestroyParam> {
 
         private static final Logger log;
 
@@ -125,7 +113,7 @@ public class PluginParam  extends AbstractDescribableImpl<PluginParam> implement
          */
         @Override
         public String getDisplayName() {
-            return "Provision vRealize Automation Blueprint";
+            return "Destroy vRealize Automation Deployment";
         }
 
         public FormValidation doCheckServerUrl(
@@ -192,12 +180,12 @@ public class PluginParam  extends AbstractDescribableImpl<PluginParam> implement
             return FormValidation.ok();
         }
 
-        public FormValidation doCheckBluePrintName(
+        public FormValidation doCheckDeploymentName(
                 @QueryParameter final String value) {
 
             String url = Util.fixEmptyAndTrim(value);
             if (url == null)
-                return FormValidation.error("Please enter the Blueprint Name.");
+                return FormValidation.error("Please enter the Deployment Name.");
 
             if (url.indexOf('$') >= 0)
                 // set by variable, can't validate
@@ -205,21 +193,6 @@ public class PluginParam  extends AbstractDescribableImpl<PluginParam> implement
 
             return FormValidation.ok();
         }
-
-        public FormValidation doCheckRequestParams(
-                @QueryParameter final String value) {
-
-            String url = Util.fixEmptyAndTrim(value);
-            if (url == null)
-                return FormValidation.error("Please enter a JSON request parameter.");
-
-            if (url.indexOf('$') >= 0)
-                // set by variable, can't validate
-                return FormValidation.ok();
-
-            return FormValidation.ok();
-        }
-
 
     }
 }
