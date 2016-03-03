@@ -39,21 +39,37 @@ public class RestClient {
         private String REQUESTS_REST_URL = "";
 
         private String TOKEN_JSON = "{\"username\": \"%s\", \"password\": \"%s\", \"tenant\": \"%s\"}";
-        private String user;
+        private String userName;
         private String password;
         private String tenant;
         private Map<String, String> outputs;
 
-        private PluginParam params;
 
-        public RestClient (){
+
+    public RestClient (){
 
         }
 
         public RestClient( PluginParam params) throws IOException {
 
             this.AUTH_REST_URL = params.getServerUrl() + "/identity/api/tokens";
-            this.params = params;
+
+            this.userName = params.getUserName();
+            this.password = params.getPassword();
+            this.tenant   = params.getTenant();
+
+            this.token = AuthToken();
+
+
+        }
+
+        public RestClient( DestroyParam dparams) throws IOException {
+
+            this.AUTH_REST_URL = dparams.getServerUrl() + "/identity/api/tokens";
+
+            this.userName = dparams.getUserName();
+            this.password = dparams.getPassword();
+            this.tenant   = dparams.getTenant();
 
             this.token = AuthToken();
 
@@ -61,7 +77,7 @@ public class RestClient {
         }
 
         public String AuthToken() throws IOException {
-            String tokenPayload = String.format(TOKEN_JSON, params.getUserName(), params.getPassword(), params.getTenant());
+            String tokenPayload = String.format(TOKEN_JSON, userName, password, tenant);
             HttpResponse httpResponse = this.Post(AUTH_REST_URL, tokenPayload);
             String responseAsJson = this.FormatResponseAsJsonString(httpResponse);
             JsonObject stringJsonAsObject = FormJsonObject(responseAsJson);

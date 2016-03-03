@@ -1,0 +1,31 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+         xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+
+        <f:entry title="vRealize Automation URL"  field="serverUrl">
+            <f:textbox name="serverUrl" />
+        </f:entry>
+
+        <f:entry title="Tenant"  field="tenant">
+             <f:textbox name="tenant" />
+        </f:entry>
+
+        <f:entry title="User Name"  field="userName">
+             <f:textbox name="userName" />
+        </f:entry>
+
+        <f:entry title="Password"  field="password">
+             <f:password name="password" />
+        </f:entry>
+
+        <f:entry title="Deployment Name"  field="deploymentName">
+             <f:textbox name="deploymentName" />
+        </f:entry>
+
+         <f:entry title="">
+                  <div align="right">
+                    <f:repeatableDeleteButton />
+                  </div>
+         </f:entry>
+
+
+</j:jelly>

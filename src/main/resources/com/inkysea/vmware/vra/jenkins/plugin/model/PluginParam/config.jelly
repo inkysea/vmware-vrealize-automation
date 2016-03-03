@@ -25,5 +25,27 @@
              <f:checkbox default="true" name="waitExec" />
         </f:entry>
 
+         <f:entry title="">
+                  <div align="right">
+                    <f:repeatableDeleteButton />
+                  </div>
+         </f:entry>
+
+       <f:entry>
+             <f:repeatable name="requestParams" field="requestParams" noAddButton="false" add="Add Parameter">
+                 <table width="100%">
+                      <f:entry title="Parameter JSON">
+                         <f:textbox field="json" />
+                         </f:entry>
+                         <f:entry>
+                         <div align="right" class="repeatable-delete show-if-only" style="margin-left: 1em;">
+                             <f:repeatableDeleteButton value="Delete Parameter" /><br/>
+                            <!-- <input type="button" value="${%Add Parameter}" class="repeatable-add show-if-last" />  -->
+                         </div>
+
+                         </f:entry>
+                 </table>
+             </f:repeatable>
+       </f:entry>
 
 </j:jelly>
