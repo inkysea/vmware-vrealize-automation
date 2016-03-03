@@ -1,0 +1,51 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+         xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+
+        <f:entry title="vRealize Automation URL"  field="serverUrl">
+            <f:textbox name="serverUrl" />
+        </f:entry>
+
+        <f:entry title="Tenant"  field="tenant">
+             <f:textbox name="tenant" />
+        </f:entry>
+
+        <f:entry title="User Name"  field="userName">
+             <f:textbox name="userName" />
+        </f:entry>
+
+        <f:entry title="Password"  field="password">
+             <f:password name="password" />
+        </f:entry>
+
+        <f:entry title="BluePrint"  field="bluePrintName">
+             <f:textbox name="blueprintName" />
+        </f:entry>
+
+        <f:entry title="Execute and Wait"  field="waitExec">
+             <f:checkbox default="true" name="waitExec" />
+        </f:entry>
+
+         <f:entry title="">
+                  <div align="right">
+                    <f:repeatableDeleteButton />
+                  </div>
+         </f:entry>
+
+       <f:entry>
+             <f:repeatable name="requestParams" field="requestParams" noAddButton="false" add="Add Parameter">
+                 <table width="100%">
+                      <f:entry title="Parameter JSON">
+                         <f:textbox field="json" />
+                         </f:entry>
+                         <f:entry>
+                         <div align="right" class="repeatable-delete show-if-only" style="margin-left: 1em;">
+                             <f:repeatableDeleteButton value="Delete Parameter" /><br/>
+                            <!-- <input type="button" value="${%Add Parameter}" class="repeatable-add show-if-last" />  -->
+                         </div>
+
+                         </f:entry>
+                 </table>
+             </f:repeatable>
+       </f:entry>
+
+</j:jelly>
