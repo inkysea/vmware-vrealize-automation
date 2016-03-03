@@ -94,7 +94,7 @@ public class vRADeploymentBuildStep  extends Builder {
 			if (deployment.Create()) {
 				this.deployments.add(deployment);
 				//change counter to string and append bs for build step
-				String strCounter = Integer.toString(counter)+"bs";
+				String strCounter = "BS_"+Integer.toString(counter);
 
 				env.putAll(deployment.getDeploymentComponents(strCounter));
 

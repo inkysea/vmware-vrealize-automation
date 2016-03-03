@@ -93,7 +93,7 @@ public class vRADeploymentPostBuildAction extends Notifier {
 				this.deployments.add(deployment);
 
 				//change counter to string and append pb for build environment
-				String strCounter = Integer.toString(counter)+"pb";
+				String strCounter = "PB_"+Integer.toString(counter);
 				env.putAll(deployment.getDeploymentComponents(strCounter));
 				counter++;
 			} else {
