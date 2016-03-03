@@ -3,6 +3,10 @@ package com.inkysea.vmware.vra.jenkins.plugin.model
 import org.junit.Test
 import java.util.logging.Logger;
 import com.inkysea.vmware.vra.jenkins.plugin.model.ExecutionStatus;
+import java.util.Properties;
+import java.io.IOException;
+import java.io.InputStream;
+
 
 /**
  * Created by kthieler on 2/23/16.
@@ -13,16 +17,40 @@ class RequestTest extends GroovyTestCase {
     private PrintStream logger;
 
 
-    private String userName = "cloudadmin@corp.local";
-    private String password = "VMware1!";
-    private String tenant = "vsphere.local";
-    private String vRAURL = "https://vra-app-1.inkysea.com/";
-    private String blueprintName = "CentOS_7";
-    private boolean waitExec = true;
-
 
     RequestTest() {
-        this.params = new PluginParam(vRAURL, userName, password, tenant, blueprintName, waitExec)
+
+        Properties prop = new Properties();
+        InputStream input = null;
+
+        try {
+
+            String filename = "config.properties";
+            input = getClass().getClassLoader().getResourceAsStream(filename);
+            if(input==null){
+                System.out.println("Sorry, unable to find " + filename);
+                return;
+            }
+
+            prop.load(input);
+            this.params = new PluginParam(prop.getProperty("vRAURL"),
+                                        prop.getProperty("userName"),
+                                        prop.getProperty("password"),
+                                        prop.getProperty("tenant"),
+                                        prop.getProperty("bluePrintName"),
+                                        prop.getProperty("waitExec"))
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally{
+            if(input!=null){
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
 

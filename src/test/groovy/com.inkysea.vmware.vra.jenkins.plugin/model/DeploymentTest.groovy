@@ -13,12 +13,6 @@ class DeploymentTest extends GroovyTestCase {
     private PrintStream logger;
 
 
-    private String userName = "cloudadmin@corp.local";
-    private String password = "VMware1!";
-    private String tenant = "vsphere.local";
-    private String vRAURL = "https://vra-app-1.inkysea.com/";
-    private String blueprintName = "CentOS_7";
-    private boolean waitExec = true;
     protected List<Deployment> deployments = new ArrayList<Deployment>();
     private String cpu = "{ \"data\":{\"CentOS7\":{\"data\":{\"cpu\":2}}}}";
     private List<RequestParam> requestParam = new ArrayList<RequestParam>();
@@ -26,7 +20,38 @@ class DeploymentTest extends GroovyTestCase {
 
 
     DeploymentTest() {
-        this.params = new PluginParam(vRAURL, userName, password, tenant, blueprintName, waitExec, requestParam)
+
+        Properties prop = new Properties();
+        InputStream input = null;
+
+        try {
+
+            String filename = "config.properties";
+            input = getClass().getClassLoader().getResourceAsStream(filename);
+            if(input==null){
+                System.out.println("Sorry, unable to find " + filename);
+                return;
+            }
+
+            prop.load(input);
+            this.params = new PluginParam(prop.getProperty("vRAURL"),
+                    prop.getProperty("userName"),
+                    prop.getProperty("password"),
+                    prop.getProperty("tenant"),
+                    prop.getProperty("bluePrintName"),
+                    prop.getProperty("waitExec"))
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally{
+            if(input!=null){
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
 

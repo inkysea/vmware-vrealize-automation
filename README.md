@@ -92,11 +92,11 @@ example: VRADEP_PB_1_TENANT=vsphere.local
 Details for each machine and NSX load balancer included in a deployment are also written as environment variables.  The 
 variables can be resolved using the deployment name and tenant from above.
 
-The IP address for each machine in a deployment is stored in an environment variable using the following name.
+The IP address for each machine in a deployment is stored in an environment variable using the following naming.
 
 TENANT_DEPLOYMENTNAME_GROUP_MACHINENAME_NETWORKNAME =  IP
 
-example:  vsphere.local_CentOS_7-18373323_CentOS7_CloudAdmins0146_DPortGroup=10.25.27.100
+example:  VSPHERE.LOCAL_CENTOS_7-18373323_CentOS7_CloudAdmins0146_DPortGroup=10.25.27.100
 
 NSX Load Balancer:
 TENANT_DEPLOYMENTNAME_LBNAME = IP
