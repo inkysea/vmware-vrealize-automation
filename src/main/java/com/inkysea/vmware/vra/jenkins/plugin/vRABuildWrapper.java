@@ -75,7 +75,7 @@ public class vRABuildWrapper extends BuildWrapper {
                     helper.replaceBuildParamWithValue(param.getUserName()),
                     helper.replaceBuildParamWithValue(param.getPassword()),
                     helper.replaceBuildParamWithValue(param.getTenant()),
-                    helper.replaceBuildParamWithValue(param.getBluePrintName()),
+                    helper.replaceBuildParamWithValue(param.getBluePrintName().replace(' ', '+')),
                     param.isWaitExec(), param.getRequestParams());
 
             final Deployment deployment = newDeployment(listener.getLogger(), fparam);
