@@ -20,6 +20,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static hudson.Util.rawEncode;
+
 
 public class PluginParam  extends AbstractDescribableImpl<PluginParam> implements Serializable {
 
@@ -61,7 +63,9 @@ public class PluginParam  extends AbstractDescribableImpl<PluginParam> implement
     }
 
     public String getBluePrintName() {
+
         return blueprintName;
+
     }
 
     public boolean isWaitExec() {

@@ -38,9 +38,12 @@ public class Deployment {
             ":\"\", \"subtenantRef\":\"\", \"subtenantLabel\":\"\"\n" +
             "}, \"state\":\"SUBMITTED\", \"requestNumber\":0, \"requestData\":{\"entries\":[]}}";
 
+    private Set<String> componentSet = new HashSet<String>();
 
     private List<List<String>> machineList = new ArrayList<List<String>>();
     private ArrayList<String> machineDataList = new ArrayList<String>();
+
+
 
     private List<List<String>> loadBalancerList = new ArrayList<List<String>>();
     private ArrayList<String> loadBalancerDataList = new ArrayList<String>();
@@ -136,6 +139,7 @@ public class Deployment {
                 JsonObject jsonData = content.getAsJsonObject().getAsJsonObject("data");
                 JsonArray  networkArray = jsonData.getAsJsonArray("NETWORK_LIST");
 
+                componentSet.add(jsonData.getAsJsonObject().get("Component").getAsString());
 
                 for (JsonElement e : networkArray) {
                     JsonElement jsonNetworkData = e.getAsJsonObject().get("data");
@@ -200,18 +204,92 @@ public class Deployment {
         HashMap<String, String> map = new HashMap<String, String>();
 
         String deploymentName = getDeploymentName();
-
-        map.put("VRADEP_"+count+"_NAME", deploymentName);
-        map.put("VRADEP_"+count+"_TENANT", params.getTenant());
+        String prefixDep = "VRADEP_"+count+"_";
+        map.put( prefixDep+"NAME", deploymentName);
+        map.put( prefixDep+"TENANT", params.getTenant());
 
 
         getMachineList();
 
+        int componentCounter=1;
+        for ( String component : componentSet ) {
+
+            String componentPrefix = prefixDep + "COMPONENT" + componentCounter;
+            String componentMachinePrefix = "";
+
+            //VRADEP_PB_1_COMPONENT#_NAME=
+            map.put(componentPrefix + "_NAME", component.toUpperCase());
+
+            Set<String> machineSet = new HashSet<String>();
+
+            for (List machine : this.machineList) {
+                if (machine.get(1).toString().equalsIgnoreCase(component)) {
+                    machineSet.add(machine.get(2).toString());
+                }
+            }
+
+            int machineCounter = 1;
+            Set<String> networkSet = new HashSet<String>();
+
+            for (String machines : machineSet) {
+
+                for (List machine : this.machineList) {
+                    if (machine.get(1).toString().equalsIgnoreCase(component)
+                            && machine.get(2).toString().equalsIgnoreCase(machines)) {
+                        componentMachinePrefix = componentPrefix + "_MACHINE" + machineCounter;
+
+                        //VRADEP_PB_1_COMPONENT#_MACHINE#_NAME=
+
+                        map.put(componentMachinePrefix + "_NAME", machine.get(2).toString().toUpperCase());
+                        networkSet.add(machine.get(3).toString());
+                        break;
+                    }
+                }
+
+                for (String network : networkSet) {
+                    int networkCounter = 1;
+                    for (List machine : this.machineList) {
+                        int ipCounter = 1;
+
+                        if (machine.get(1).toString().equalsIgnoreCase(component)
+                                && machine.get(3).toString().equalsIgnoreCase(network)) {
+
+                            String networkMachinePrefix = componentMachinePrefix + "_NETWORK" + networkCounter;
+
+                            //VRADEP_PB_1_COMPONENT#_MACHINE#_NETWORK#_NAME=
+
+                            map.put(networkMachinePrefix + "_NAME", machine.get(3).toString().toUpperCase());
+
+                            //VRADEP_PB_1_COMPONENT#_MACHINE#_NETWORK#_IP#=
+
+                            map.put(networkMachinePrefix + "_IP" + ipCounter, machine.get(4).toString().toUpperCase());
+                            ipCounter++;
+                            networkCounter++;
+                            break;
+                        }
+                    }
+
+                }
+
+                machineCounter++;
+
+            }
+        }
+
+        /*
         for( List machine : this.machineList ){
             //creat map named grup__machine_name__network_name :  network address
             for ( Object data : machine ){
-                //tenant_deployment_group_machine_network = IP
-                map.put(params.getTenant().toUpperCase() + "_" + deploymentName.toUpperCase()+"_"+
+                //VRADEP_PB_1_COMPONENT#_NAME=
+                map.put(prefixDep+machine.get(1).toString().toUpperCase()+"_"+
+                                machine.get(1).toString().toUpperCase()+"_"+
+                                machine.get(2).toString().toUpperCase()+"_"+
+                                machine.get(3).toString().toUpperCase(),
+                                    machine.get(4).toString().toUpperCase());
+                //VRADEP_PB_1_COMPONENT#_MACHINE#_NAME=
+                //VRADEP_PB_1_COMPONENT#_MACHINE#_NETWORK#_NAME=
+                //VRADEP_PB_1_COMPONENT#_MACHINE#_NETWORK#_IP#=
+                map.put("VRADEP_"+count+"_"+params.getTenant().toUpperCase() + "_" +
                                 machine.get(1).toString().toUpperCase()+"_"+
                                 machine.get(2).toString().toUpperCase()+"_"+
                                 machine.get(3).toString().toUpperCase(),
@@ -219,16 +297,19 @@ public class Deployment {
             }
 
         }
+        */
 
         getLoadBalancerList();
 
         for( List loadbalancer : this.loadBalancerList ){
-            //creat map named grup__machine_name__network_name :  network address
+
+            int lbCounter = 1;
             for ( Object data : loadbalancer ){
-                //tenant_deployment_group_machine_network = IP
-                map.put(params.getTenant().toUpperCase() + "_" + deploymentName.toUpperCase()+
-                                loadbalancer.get(1).toString().toUpperCase(),
-                                loadbalancer.get(2).toString());
+                String lbPrefix = prefixDep+"LB"+lbCounter+"_";
+                //VRADEP_PB_1_LBNAME
+                map.put(lbPrefix + "NAME",loadbalancer.get(1).toString().toUpperCase());
+                map.put(lbPrefix + "SERVICES",loadbalancer.get(2).toString());
+
             }
 
         }
@@ -378,8 +459,8 @@ public class Deployment {
         String json1 = mainJson.toString();
         String json2 = updateJson.toString();
 
-        System.out.println("Original BP request : "+json1);
-        System.out.println("JSON to merge : "+json2);
+        System.out.println("Original BP request : " + json1);
+        System.out.println("JSON to merge : " + json2);
 
 
         JsonNode mainNode = mapper.readTree(json1);
@@ -456,7 +537,7 @@ public class Deployment {
 
     public boolean Destroy( String DeploymentName ) throws IOException {
 
-        System.out.println("Destroying Deployment "+DeploymentName);
+        logger.println("Destroying Deployment "+DeploymentName);
 
         // Get ResrouceView to find parentID from name
         this.deploymentResources = this.request.GetResourceView();
