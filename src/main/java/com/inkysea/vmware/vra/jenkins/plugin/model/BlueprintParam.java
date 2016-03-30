@@ -2,11 +2,9 @@ package com.inkysea.vmware.vra.jenkins.plugin.model;
 
 import hudson.Extension;
 import hudson.Util;
+import hudson.model.AbstractDescribableImpl;
 import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
-import hudson.model.AbstractDescribableImpl;
-
-import hudson.tools.AbstractCommandInstaller;
 import hudson.util.FormValidation;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -17,35 +15,38 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.List;
 import java.util.logging.Logger;
 
-import static hudson.Util.rawEncode;
 
-
-public class PluginParam  extends AbstractDescribableImpl<PluginParam> implements Serializable {
+public class BlueprintParam extends AbstractDescribableImpl<BlueprintParam> implements Serializable {
 
     private String serverUrl;
     private String userName;
     private String password;
     private String tenant;
+    private boolean packageBlueprint;
+    private String blueprintPath;
+    private boolean overWrite;
+    private boolean publishBlueprint;
+    private String serviceCategory;
     private String blueprintName;
-    private boolean waitExec;
-    private boolean requestTemplate;
-    private List<RequestParam> requestParams;
+    private boolean reassignBlueprint;
+
 
     @DataBoundConstructor
-    public PluginParam(String serverUrl, String userName, String password, String tenant,
-                       String blueprintName, boolean waitExec, boolean requestTemplate,
-                       List<RequestParam> requestParams) {
+    public BlueprintParam(String serverUrl, String userName, String password, String tenant,
+                           boolean packageBlueprint, String blueprintPath, boolean overWrite,
+                          boolean publishBlueprint, String serviceCategory){
+
         this.serverUrl = serverUrl;
         this.userName = userName;
         this.password = password;
         this.tenant = tenant;
-        this.blueprintName = blueprintName;
-        this.waitExec = waitExec;
-        this.requestTemplate = requestTemplate;
-        this.requestParams = requestParams;
+        this.packageBlueprint = packageBlueprint;
+        this.blueprintPath = blueprintPath;
+        this.overWrite = overWrite;
+        this.publishBlueprint = publishBlueprint;
+        this.serviceCategory = serviceCategory;
 
     }
 
@@ -71,17 +72,35 @@ public class PluginParam  extends AbstractDescribableImpl<PluginParam> implement
 
     }
 
-    public boolean isWaitExec() {
-        return waitExec;
+
+    public boolean getPackageBlueprint() {
+        return packageBlueprint;
     }
 
-    public boolean getRequestTemplate() {
-        return requestTemplate;
+
+    public boolean getPublishBlueprint() {
+        return publishBlueprint;
     }
 
-    public List<RequestParam> getRequestParams() {
-        return requestParams;
+    public boolean getReassignBlueprint() {
+        return reassignBlueprint;
     }
+
+
+    public String getBlueprintPath() {
+
+        return blueprintPath;
+
+    }
+
+    public boolean getOverWrite() {
+        return overWrite;
+    }
+
+    public String getServiceCategory() {
+        return serviceCategory;
+    }
+
 
     public Boolean validate() throws IOException {
         if (StringUtils.isBlank(this.getServerUrl())) {
@@ -103,13 +122,16 @@ public class PluginParam  extends AbstractDescribableImpl<PluginParam> implement
         if (StringUtils.isBlank(this.getBluePrintName())) {
             throw new IOException("vRA BluePrint name cannot be empty");
         }
+        if (StringUtils.isBlank(this.getBlueprintPath())) {
+            throw new IOException("vRA BluePrint path cannot be empty");
+        }
 
 
         return true;
     }
 
     @Extension
-    public static final class DescriptorImpl extends Descriptor<PluginParam> {
+    public static final class DescriptorImpl extends Descriptor<BlueprintParam> {
 
         private static final Logger log;
 
@@ -217,12 +239,12 @@ public class PluginParam  extends AbstractDescribableImpl<PluginParam> implement
             return FormValidation.ok();
         }
 
-        public FormValidation doCheckRequestParams(
+        public FormValidation doCheckBlueprintPath(
                 @QueryParameter final String value) {
 
             String url = Util.fixEmptyAndTrim(value);
             if (url == null)
-                return FormValidation.error("Please enter a JSON request parameter.");
+                return FormValidation.error("Please enter the Blueprint Path.");
 
             if (url.indexOf('$') >= 0)
                 // set by variable, can't validate

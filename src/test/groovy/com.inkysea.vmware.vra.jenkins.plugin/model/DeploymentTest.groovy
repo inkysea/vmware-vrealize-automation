@@ -10,6 +10,8 @@ import org.junit.Test
 class DeploymentTest extends GroovyTestCase {
 
     private PluginParam params;
+    private RequestParam rParams;
+
     private PrintStream logger;
 
 
@@ -34,12 +36,20 @@ class DeploymentTest extends GroovyTestCase {
             }
 
             prop.load(input);
+
+            this.rParams = new RequestParam(prop.getProperty("requestParam"))
+            this.requestParam.add(rParams)
+
             this.params = new PluginParam(prop.getProperty("vRAURL"),
                     prop.getProperty("userName"),
                     prop.getProperty("password"),
                     prop.getProperty("tenant"),
                     prop.getProperty("bluePrintName"),
-                    prop.getProperty("waitExec"))
+                    Boolean.parseBoolean(prop.getProperty("waitExec")),
+                    Boolean.parseBoolean(prop.getProperty("blueprintTemplate")),
+                    this.requestParam
+            );
+
 
         } catch (IOException ex) {
             ex.printStackTrace();

@@ -11,7 +11,7 @@
     </parent>
     <groupId>com.inkysea.vmware.vra</groupId>
     <artifactId>vmware-vrealize-automation-plugin</artifactId>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.1.2-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
     <name>VMware vRealize Automation Plugin</name>
@@ -39,7 +39,7 @@
         <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}.git</developerConnection>
         <url>http://github.com/jenkinsci/${project.artifactId}</url>
-        <tag>vmware-vrealize-automation-plugin-1.1</tag>
+        <tag>vmware-vrealize-automation-plugin-1.1.1</tag>
     </scm>
     <repositories>
         <repository>
@@ -66,6 +66,11 @@
             <version>4.4</version>
         </dependency>
         <dependency>
+               <groupId>org.apache.httpcomponents</groupId>
+               <artifactId>httpmime</artifactId>
+               <version>4.5.2</version>
+        </dependency>
+        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.3.1</version>
@@ -79,6 +84,11 @@
         	<groupId>org.apache.commons</groupId>
         	<artifactId>commons-lang3</artifactId>
         	<version>3.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.10</version>
         </dependency>
         <dependency>
         	<groupId>org.springframework.data</groupId>

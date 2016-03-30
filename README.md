@@ -12,9 +12,9 @@ The vRealize Automation Jenkins plugin enables Jenkins to provision vRealize Aut
 * Maven if compiling the plugin
        
     
-## How to Configure
+## How to Configure for Deployments
 
-The vRealize Automation plugin can be configured as a build environment, build step and a post build action.
+For Deployments, the vRealize Automation plugin can be configured as a build environment, build step and a post build action.
 
 1) Build Environment : Check the "Create vRealize Automation Deployment".  Note that jenkins will automatically 
 destroy any environments provisioned as part of the build once the build completes. Environment details will be 
@@ -121,9 +121,27 @@ VRADEP_BS_#_LB#_NAME
 VRADEP_BS_1_LB1_SERVICES=Virtual IP: 192.168.110.211, Services: HTTP
 
 
-## To Be Added in the future
-   * Publish Blueprint - Allows Jenkins to publish a YAML Blueprint to vRealize Automation
+## How to Configure for Blueprints as Code
+
+The plugin enables infrastructure as code for vRealize Automation blueprints that have been exported as YAML.  
+The current version of the plugin as of 1.3 only support packaged blueprints which include the necessary composite-blueprint
+and software components.  The following screenshot is an example file structure for a blueprint package.  
+
+![Configure](/doc/blueprintFileStructure.png)    
+
+To configure the Jenkins plugin for blueprints, apply the credentials to authenticate to vRA. Apply the following settings.
   
+  1.  Blueprint Path is the relative path to the directory containing your blueprint.
+  
+  2.  The Publish Blueprint determines if the blueprint will be published in vRA or left as a draft.  To deploy a blueprint
+  the blueprint must be published.
+  
+  3.  Assign to Service Category publishes the blueprint to a service category in vRA.  Note that the Service Category must already
+  exist in vRA.  If this is an update to a blueprint that already belongs to a service category, changing this field will assign the 
+  blueprint to the service category specified in this field.
+  
+![Configure](/doc/BPConfig.png)    
+
 
 ## Compile and Installation
 
