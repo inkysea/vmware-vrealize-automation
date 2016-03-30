@@ -31,17 +31,20 @@ public class PluginParam  extends AbstractDescribableImpl<PluginParam> implement
     private String tenant;
     private String blueprintName;
     private boolean waitExec;
+    private boolean requestTemplate;
     private List<RequestParam> requestParams;
 
     @DataBoundConstructor
     public PluginParam(String serverUrl, String userName, String password, String tenant,
-                       String blueprintName, boolean waitExec,List<RequestParam> requestParams) {
+                       String blueprintName, boolean waitExec, boolean requestTemplate,
+                       List<RequestParam> requestParams) {
         this.serverUrl = serverUrl;
         this.userName = userName;
         this.password = password;
         this.tenant = tenant;
         this.blueprintName = blueprintName;
         this.waitExec = waitExec;
+        this.requestTemplate = requestTemplate;
         this.requestParams = requestParams;
 
     }
@@ -70,6 +73,10 @@ public class PluginParam  extends AbstractDescribableImpl<PluginParam> implement
 
     public boolean isWaitExec() {
         return waitExec;
+    }
+
+    public boolean getRequestTemplate() {
+        return requestTemplate;
     }
 
     public List<RequestParam> getRequestParams() {

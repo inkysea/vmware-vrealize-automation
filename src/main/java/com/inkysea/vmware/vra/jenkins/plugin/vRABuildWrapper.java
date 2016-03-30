@@ -70,13 +70,21 @@ public class vRABuildWrapper extends BuildWrapper {
         int counter = 1;
         for (PluginParam param : params) {
 
+            // resolve build vars in request params
+            List<RequestParam> rparamResolved = new ArrayList<RequestParam>();;
+
+            for(RequestParam rparam : param.getRequestParams()){
+                String rparamString =  helper.replaceBuildParamWithValue(rparam.getRequestParam().toString());
+                rparamResolved.add(new RequestParam(rparamString));
+            }
+
             // Resolve any environment variables in the parameters
             PluginParam fparam = new PluginParam(helper.replaceBuildParamWithValue(param.getServerUrl()),
                     helper.replaceBuildParamWithValue(param.getUserName()),
                     helper.replaceBuildParamWithValue(param.getPassword()),
                     helper.replaceBuildParamWithValue(param.getTenant()),
-                    helper.replaceBuildParamWithValue(param.getBluePrintName().replace(' ', '+')),
-                    param.isWaitExec(), param.getRequestParams());
+                    helper.replaceBuildParamWithValue(param.getBluePrintName()),
+                    param.isWaitExec(),param.getRequestTemplate(), rparamResolved);
 
             final Deployment deployment = newDeployment(listener.getLogger(), fparam);
 

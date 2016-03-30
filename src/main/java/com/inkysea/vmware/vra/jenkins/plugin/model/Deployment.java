@@ -32,6 +32,8 @@ public class Deployment {
     private String businessGroupId;
     private String tenantId;
     public JsonObject bluePrintTemplate;
+    private String cataologID;
+    private String subtenantRef;
 
     private String jsonString = "{\"@type\":\"ResourceActionRequest\", \"resourceRef\":{\"id\":\"\"}, \"resourceActionRef\"\n" +
             ":{\"id\":\"\"}, \"organization\":{\"tenantRef\":\"\", \"tenantLabel\"\n" +
@@ -56,10 +58,6 @@ public class Deployment {
 
         this.request  = new Request(logger, params);
 
-        this.bluePrintTemplate = this.request.GetBluePrintTemplate();
-
-
-
     }
 
     public Deployment(PrintStream logger, DestroyParam params) throws IOException {
@@ -76,30 +74,69 @@ public class Deployment {
 
         boolean rcode = false;
 
-        // merge deployment options into request blueprint
+        if ( params.getRequestTemplate()) {
 
-        JsonParser parser = new JsonParser();
+            logger.println("Requesting Blueprint Template");
+            this.bluePrintTemplate = this.request.GetBluePrintTemplate();
+            JsonParser parser = new JsonParser();
 
-        for ( RequestParam option : params.getRequestParams()){
+            for ( RequestParam option : params.getRequestParams()){
+                if (option.getJson().isEmpty() ){
 
+                    logger.println("Request Parameter is null. skipping to next parameter");
 
-            if (option.getJson().isEmpty() ){
+                }else {
+                    logger.println("Request Parameter : " + option.getJson());
 
-                logger.println("Request Parameter is null. skipping to next parameter");
-
-
-            }else {
-
-                logger.println("Request Parameter : " + option.getJson());
-
-
-                this.bluePrintTemplate = merge(this.bluePrintTemplate.getAsJsonObject(),
-                        parser.parse(option.getJson()).getAsJsonObject());
+                    this.bluePrintTemplate = merge(this.bluePrintTemplate.getAsJsonObject(),
+                            parser.parse(option.getJson()).getAsJsonObject());
+                }
             }
-        }
+            request.ProvisionBluePrint(this.bluePrintTemplate);
 
-        logger.println("Requesting Blueprint with JSON template : " + this.bluePrintTemplate);
-        request.ProvisionBluePrint(this.bluePrintTemplate);
+        }else{
+
+            JsonObject bpDetails = request.fetchBluePrint();
+
+            JsonArray contentArray = bpDetails.getAsJsonArray("content");
+
+            for (JsonElement content : contentArray ){
+
+                if( content.getAsJsonObject().get("name").getAsString().equalsIgnoreCase(params.getBluePrintName())){
+
+                    this.cataologID= content.getAsJsonObject().get("catalogItemId").getAsString();
+
+                    JsonArray orgArray = content.getAsJsonObject().getAsJsonArray("entitledOrganizations");
+
+                    for ( JsonElement org : orgArray ){
+                        if( org.getAsJsonObject().get("tenantLabel").getAsString().equalsIgnoreCase(params.getTenant())){
+                            this.subtenantRef= org.getAsJsonObject().get("subtenantRef").getAsString();
+                            break;
+                        }
+
+                    }
+
+                    break;
+                }
+            }
+
+            if(this.cataologID == null ){
+                throw new IOException("Did not find the catalogID value from the provided blueprint : "
+                        +params.getBluePrintName()+"\nPlease validate blueprint name in vRA");
+            }
+
+
+
+            if(this.subtenantRef == null ){
+                throw new IOException("Did not find the subtenantRef value from the provided tenant name : "
+                                        +params.getTenant()+"\nPlease validate tenant name in vRA");
+            }
+
+            this.bluePrintTemplate = requestCreateJSON();
+            String json = this.bluePrintTemplate.toString();
+            System.out.println("Requesting Blueprint with JSON body : " + json);
+            request.PostRequestJson(this.bluePrintTemplate.toString());
+        }
 
 
         if (this.params.isWaitExec()) {
@@ -124,6 +161,56 @@ public class Deployment {
         }
 
         return rcode;
+
+    }
+
+    private JsonObject requestCreateJSON(){
+
+        // create the albums object
+        JsonObject requestJson = new JsonObject();
+        // add a property calle title to the albums object
+            requestJson.addProperty("@type","CatalogItemRequest");
+
+            JsonObject catalogItemRef = new JsonObject();
+                catalogItemRef.addProperty("id",this.cataologID);
+            requestJson.add("catalogItemRef", catalogItemRef);
+
+            JsonObject organization = new JsonObject();
+                organization.addProperty("tenantRef",this.params.getTenant());
+                organization.addProperty("subtenantRef",this.subtenantRef);
+            requestJson.add("organization", organization);
+
+            requestJson.addProperty("requestedFor",this.params.getUserName());
+            requestJson.addProperty("state","SUBMITTED");
+            requestJson.addProperty("requestNumber", 0);
+
+
+                JsonObject requestData = new JsonObject();
+
+
+                    JsonArray entriesArray = new JsonArray();
+                    JsonObject entries = new JsonObject();
+
+                        entries.addProperty("key", "requestedFor");
+
+                        JsonObject value = new JsonObject();
+                            value.addProperty("type","string");
+                            value.addProperty("value",this.params.getUserName());
+
+                        entries.add("value", value);
+
+                    entriesArray.add(entries);
+
+                    for ( RequestParam option : params.getRequestParams()) {
+                        JsonElement response = new JsonParser().parse(option.getJson()).getAsJsonObject();
+                        entriesArray.add( response );
+
+                    }
+
+                requestData.add("entries", entriesArray);
+            requestJson.add("requestData", requestData);
+
+        return requestJson;
 
     }
 
@@ -540,7 +627,7 @@ public class Deployment {
         logger.println("Destroying Deployment "+DeploymentName);
 
         // Get ResrouceView to find parentID from name
-        this.deploymentResources = this.request.GetResourceView();
+        this.deploymentResources = this.request.GetResourceView(DeploymentName);
         System.out.println("JSON Obj "+this.deploymentResources);
 
         this.getParentResourceID(DeploymentName);
