@@ -1,9 +1,0 @@
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
-         xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-
-	<f:entry>
-		<f:repeatableProperty field="params" minimum="1" header="Blueprint configuration" add="Add vRA Blueprint">
-		</f:repeatableProperty>
-	</f:entry>
-
-</j:jelly>
