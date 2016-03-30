@@ -25,6 +25,10 @@
              <f:checkbox default="true" name="waitExec" />
         </f:entry>
 
+        <f:entry title="Request using Blueprint Template"  field="requestTemplate">
+            <f:checkbox default="false" name="requestTemplate" />
+        </f:entry>
+
          <f:entry title="">
                   <div align="right">
                     <f:repeatableDeleteButton />
