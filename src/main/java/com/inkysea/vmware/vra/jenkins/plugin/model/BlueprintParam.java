@@ -158,7 +158,7 @@ public class BlueprintParam extends AbstractDescribableImpl<BlueprintParam> impl
          */
         @Override
         public String getDisplayName() {
-            return "Provision vRealize Automation Blueprint";
+            return "Load vRealize Automation Blueprint";
         }
 
         public FormValidation doCheckServerUrl(

@@ -6,7 +6,6 @@ package com.inkysea.vmware.vra.jenkins.plugin;
 
 import com.inkysea.vmware.vra.jenkins.plugin.model.Blueprint;
 import com.inkysea.vmware.vra.jenkins.plugin.model.BlueprintParam;
-import com.inkysea.vmware.vra.jenkins.plugin.model.RequestParam;
 import com.inkysea.vmware.vra.jenkins.plugin.util.EnvVariableResolver;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -33,7 +32,6 @@ public class vRABlueprintBuildStep extends Builder {
 
 	protected List<BlueprintParam> params;
 	protected List<Blueprint> blueprintList = new ArrayList<Blueprint>();
-	private List<RequestParam> requestParams;
 
 	@DataBoundConstructor
 	public vRABlueprintBuildStep(List<BlueprintParam> params) {
