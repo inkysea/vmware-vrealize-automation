@@ -54,7 +54,8 @@ Configure :  Configure the plugin as shown
    
       
    The format of your configuration JSON will depend on your selection of the "Request using Blueprint Template" option.
-   If you stay with the default, option is unchecked, you will define the JSON like the string below.  
+   If you stay with the default, option is unchecked, you will define the JSON like the string below.  Note: Due to format
+   constraints, I had to place white space to allow for bold. Please exclude the white space.
    
    {"key":"provider- **CommerceWebApp_1** ",
     "value":{"type":"complex",
