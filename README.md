@@ -53,10 +53,6 @@ Configure :  Configure the plugin as shown
 ## Deployment Parameters
    
    
-   The JSON for parameters can be determined by looking at the JSON blueprint template from vRA.  The template for a 
-   blueprint can be viewed by running a build job and looking at the console output or using the vRealize cloudclient. 
-   See below for the JSON blueprint logged to the build console.
-   
    A note about Deployment configuration parameters:
    
    The format of your configuration JSON will depend on your selection of the "Request using Blueprint Template" option.
