@@ -67,7 +67,7 @@ Configure :  Configure the plugin as shown
     }
        
    Note the bold text will change based on your blueprint.  The provider name will be the name of your component in the
-   blueprint. The entries array in the JSON will be a key/value mapping in this case my key is artifactURL, which is 
+   blueprint. The entries array in the JSON will be a key/value mapping. In this case my key is artifactURL, which is 
    also the property in my blueprint that I want to set a value.  The value is set to my artifact repository URL.   Since this is
    a JSON array, you can specify multiple key/value pairs that belong to same provider.  
      
