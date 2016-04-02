@@ -40,15 +40,52 @@ Configure :  Configure the plugin as shown
   * Password - Password for  user
   * Blueprint - The name of the blueprint to be provisioned.
   * Execute and Wait - If checked the Jenkins job will wait for the blueprint to be provisioned
+  * Request using Blueprint Template - Disabled by default.  Checking this box will use the blueprint template.  I've 
+    disabled this as requesting via Blueprint Template's provide inconsistent results if you have multiple network profiles
+    defined in your reservation.  Also note that using the blueprint template means that the JSON required for the deployment
+    configuration options will differ.
   * Add Deployment Configuration - Deployment configuration parameters can be specified to adjust settings such as CPU.
-   Parameters are specified as JSON.
-
+   Parameters are specified as JSON.    Thy format of the JSON string will differ if you have the "Request using 
+   Blueprint Template" enabled.
+   
 ![Configure](/doc/vRA_BuildStep.png)    
-
+   
+   
+   The JSON for parameters can be determined by looking at the JSON blueprint template from vRA.  The template for a 
+   blueprint can be viewed by running a build job and looking at the console output or using the vRealize cloudclient. 
+   See below for the JSON blueprint logged to the build console.
+   
+   A note about Deployment configuration parameters:
+   
+   The format of your configuration JSON will depend on your selection of the "Request using Blueprint Template" option.
+   If you stay with the default, option is unchecked.  you will define the JSON like the string below.  
+   
+   {"key":"provider- **CommerceWebApp_1** ",
+    "value":{"type":"complex",
+            "values":{" *entries* " :[
+                        {"key":" **artifactURL** ", "value":{"type":"string", "value":" **http://artifactserver/commerceApp.zip** "}}
+                        ]
+                     }
+            }
+    }
        
-    The JSON for parameters can be determined by looking at the JSON blueprint template from vRA.  The template for a 
-    blueprint can be viewed by running a build job and looking at the console output or using the vRealize cloudclient. 
-    See below for the JSON blueprint logged to the build console.
+   Note the bold text will change based on your blueprint.  The provider name will be the name of your component in the
+   blueprint. The entries array in the JSON will be a key/value mapping in this case my key is artifactURL, which is 
+   also the property in my blueprint that I want to set a value.  The value is set to my artifact repository URL.   Since this is
+   a JSON array, you can specify multiple key/value pairs that belong to same provider.  
+     
+     for example: "entries": [  { "key":"var1", "value"="value1" } , { "key":"var2", "value"="value2" } ]
+    
+   
+   If you choose "Request using Blueprint Template" then your JSON format must match the blueprint templates contents.
+   The blueprint template will be logged to the console window as shown below.  You may also get the template using the
+   cloudclient.  Simply search for the section that contains the parameter you wish to change and copy that JSON to your
+   deployment configuration paramemters.  I'd recommend using a friendly JSON editor to look at the contents of the blueprint
+   template so that you can select the parameters you wish to modify.
+   
+   For example:  A simple CPU change in a blueprint template where CentOS7 is the name of the VM in the blueprint.
+   
+   {"data":{" **CentOS7** ":{"data":"cpu":2}}}}
      
 ![Configure](/doc/console.png)    
      
