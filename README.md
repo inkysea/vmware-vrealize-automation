@@ -50,6 +50,8 @@ Configure :  Configure the plugin as shown
    
 ![Configure](/doc/vRA_BuildStep.png)    
    
+## Deployment Parameters
+   
    
    The JSON for parameters can be determined by looking at the JSON blueprint template from vRA.  The template for a 
    blueprint can be viewed by running a build job and looking at the console output or using the vRealize cloudclient. 
