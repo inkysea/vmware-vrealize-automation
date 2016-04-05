@@ -37,9 +37,9 @@ public class RequestParam extends AbstractDescribableImpl<RequestParam> implemen
             throw new IOException("Deployment Parameter can not be empty");
         }
 
-
         return true;
     }
+
     public String getJson() {
         return json;
     }

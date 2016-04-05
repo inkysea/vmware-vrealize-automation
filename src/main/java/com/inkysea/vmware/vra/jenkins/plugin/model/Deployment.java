@@ -81,7 +81,7 @@ public class Deployment {
             JsonParser parser = new JsonParser();
 
             for ( RequestParam option : params.getRequestParams()){
-                if (option.getJson().isEmpty() ){
+                if ( option.getJson() == null ){
 
                     logger.println("Request Parameter is null. skipping to next parameter");
 
@@ -202,8 +202,16 @@ public class Deployment {
                     entriesArray.add(entries);
 
                     for ( RequestParam option : params.getRequestParams()) {
-                        JsonElement response = new JsonParser().parse(option.getJson()).getAsJsonObject();
-                        entriesArray.add( response );
+
+                        if ( option.getJson() == null ){
+
+                            logger.println("Request Parameter is null. skipping to next parameter");
+
+                        }else {
+                            logger.println("Request Parameter : " + option.getJson());
+                            JsonElement response = new JsonParser().parse(option.getJson()).getAsJsonObject();
+                            entriesArray.add(response);
+                        }
 
                     }
 

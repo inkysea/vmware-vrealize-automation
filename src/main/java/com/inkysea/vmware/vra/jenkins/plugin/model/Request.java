@@ -61,7 +61,8 @@ public class Request  {
             e.printStackTrace();
         }
 
-        String catalogServiceApiUrl = params.getServerUrl() + "/catalog-service/api/";
+        String catalogServiceApiUrl = params.getServerUrl().replaceFirst("/+$", "")
+                                                + "/catalog-service/api/";
 
         this.REQUESTS_ID_URL = catalogServiceApiUrl + "consumer/requests/%s";
         this.REQUESTS_POST_URL = catalogServiceApiUrl + "consumer/requests/";
@@ -98,7 +99,7 @@ public class Request  {
             e.printStackTrace();
         }
 
-        String catalogServiceApiUrl = dparams.getServerUrl() + "/catalog-service/api/";
+        String catalogServiceApiUrl = dparams.getServerUrl().replaceFirst("/+$", "") + "/catalog-service/api/";
 
         this.REQUESTS_ID_URL = catalogServiceApiUrl + "consumer/requests/%s";
         this.REQUESTS_POST_URL = catalogServiceApiUrl + "consumer/requests/";
@@ -113,6 +114,7 @@ public class Request  {
     }
 
     public Request(PrintStream logger, String vRA_URL, String userName, String password, String tenant ) {
+        // Constructor for blueprint requests
 
         this.logger = logger;
 
@@ -124,7 +126,7 @@ public class Request  {
             e.printStackTrace();
         }
 
-        String catalogServiceApiUrl = vRA_URL + "/catalog-service/api/";
+        String catalogServiceApiUrl = vRA_URL.replaceFirst("/+$", "") + "/catalog-service/api/";
 
         this.REQUESTS_ID_URL = catalogServiceApiUrl + "consumer/requests/%s";
         this.REQUESTS_POST_URL = catalogServiceApiUrl + "consumer/requests/";
@@ -209,6 +211,8 @@ public class Request  {
 
     public JsonObject fetchBluePrint() throws IOException {
         JsonObject response = null;
+        System.out.println("Fetching BP :" + params.getBluePrintName());
+
         String url = String.format(FETCH_CATALOG_ITEM, params.getBluePrintName()).replace(' ', '+');
         System.out.println("Using :" + url);
 
@@ -246,14 +250,19 @@ public class Request  {
 
         JsonObject response = this.fetchBluePrint();
 
-        String catalogId = response.getAsJsonObject().getAsJsonPrimitive("catalogItemId").toString();
-        this.catalogId = catalogId.replaceAll("^\"|\"$", "");
+        JsonArray catalogItemContentArray = response.getAsJsonArray("content");
 
-        JsonArray linkArray = response.getAsJsonArray("links");
+        this.catalogId = catalogItemContentArray.get(0).getAsJsonObject()
+                .get("catalogItemId").getAsString();
+
+        JsonArray linkArray = catalogItemContentArray.get(0)
+                                                     .getAsJsonObject()
+                                                     .getAsJsonArray("links");
+
+        System.out.println("Links Array: "+linkArray);
 
 
-        String templateURL = linkArray.get(0).getAsJsonObject().get("href").toString();
-        templateURL = templateURL.replaceAll("^\"|\"$", "");
+        String templateURL = linkArray.get(0).getAsJsonObject().get("href").getAsString();
 
         String url = templateURL;
         System.out.println("Get BP Template: "+templateURL);
