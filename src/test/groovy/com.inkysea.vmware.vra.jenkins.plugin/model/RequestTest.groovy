@@ -25,7 +25,7 @@ class RequestTest extends GroovyTestCase {
 
         try {
 
-            String filename = "config.properties";
+            String filename = "../../config.properties";
             input = getClass().getClassLoader().getResourceAsStream(filename);
             if(input==null){
                 System.out.println("Sorry, unable to find " + filename);
