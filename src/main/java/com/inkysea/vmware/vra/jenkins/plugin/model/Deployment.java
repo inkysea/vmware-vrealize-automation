@@ -109,7 +109,7 @@ public class Deployment {
                     JsonArray orgArray = content.getAsJsonObject().getAsJsonArray("entitledOrganizations");
 
                     for ( JsonElement org : orgArray ){
-                        if( org.getAsJsonObject().get("tenantLabel").getAsString().equalsIgnoreCase(params.getTenant())){
+                        if( org.getAsJsonObject().get("tenantLabel").getAsString() != null) {
                             this.subtenantRef= org.getAsJsonObject().get("subtenantRef").getAsString();
                             break;
                         }
